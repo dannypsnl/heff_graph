@@ -1,0 +1,125 @@
+module test.graph
+
+import check
+import co
+import generator as Generator
+import heff_graph.graph
+
+-- | A graph as its vertices and its edges, each sorted and without
+-- | duplicates, so that two equal graphs are written the same.
+data Relation = MkRelation (List Int) (List (Pair Int Int))
+
+instance instanceShowRelation : Show Relation
+instanceShowRelation = { show = written }
+  where
+  written : Relation -> String
+  written (MkRelation vs es) = "MkRelation (" ^ show vs ^ ") (" ^ show es ^ ")"
+
+-- | `xs` sorted, each element once.
+normal : {a : Type} -> {{ord : Order a}} -> List a -> List a
+normal xs = dedup (List.sort xs)
+  where
+  dedup : List a -> List a
+  dedup (x :: y :: rest) =
+    if compare x y == EQ then dedup (y :: rest) else x :: dedup (y :: rest)
+  dedup ys = ys
+
+instance instanceGraphRelation : Graph Relation
+instanceGraphRelation =
+  { v = Int
+  , empty = MkRelation [] []
+  , vertex = \x -> MkRelation [x] []
+  , overlay = \(MkRelation xs es) (MkRelation ys fs) ->
+        MkRelation (normal (xs ++ ys)) (normal (es ++ fs))
+  , connect = \(MkRelation xs es) (MkRelation ys fs) ->
+        MkRelation
+          (normal (xs ++ ys))
+          (normal
+             (es
+              ++ fs
+              ++ List.concatMap (\x -> List.map (\y -> MkPair x y) ys) xs))
+  }
+
+-- | A graph built by the theory's operations, of at most `n` of them,
+-- | on the vertices 0 to 5 (few, so that the operands share some).
+graphOf : Int -> Generator.Generator Relation
+graphOf n =
+  if n <= 1
+  then Generator.oneOf
+      (MkNonEmptyList
+         (Generator.constant empty)
+         [ Generator.map
+           (\(i : Int) -> (vertex i : Relation))
+           (Generator.int 0 5)
+         ])
+  else Generator.oneOf
+      (MkNonEmptyList
+         (graphOf 1)
+         [ Generator.map2 (\a b -> a + b) (graphOf (n / 2)) (graphOf (n / 2))
+         , Generator.map2 (\a b -> a ~> b) (graphOf (n / 2)) (graphOf (n / 2))
+         ])
+
+-- | A graph of a size that grows with the runs.
+graph : Generator.Generator Relation
+graph = Generator.sized (\n -> graphOf (n / 4))
+
+laws : Test
+laws =
+  group
+    "Graph laws"
+    [ property "x + y = y + x" (do
+        x <- forAll graph
+        y <- forAll graph
+        assertEqual (x + y) (y + x))
+    , property "x + (y + z) = (x + y) + z" (do
+        x <- forAll graph
+        y <- forAll graph
+        z <- forAll graph
+        assertEqual (x + (y + z)) ((x + y) + z))
+    , property "x + x = x" (do
+        x <- forAll graph
+        assertEqual (x + x) x)
+    , property "empty ~> x = x" (do
+        x <- forAll graph
+        assertEqual (empty ~> x) x)
+    , property "x ~> empty = x" (do
+        x <- forAll graph
+        assertEqual (x ~> empty) x)
+    , property "x ~> (y ~> z) = (x ~> y) ~> z" (do
+        x <- forAll graph
+        y <- forAll graph
+        z <- forAll graph
+        assertEqual (x ~> (y ~> z)) ((x ~> y) ~> z))
+    , property "x ~> (y + z) = (x ~> y) + (x ~> z)" (do
+        x <- forAll graph
+        y <- forAll graph
+        z <- forAll graph
+        assertEqual (x ~> (y + z)) ((x ~> y) + (x ~> z)))
+    , property "(x + y) ~> z = (x ~> z) + (y ~> z)" (do
+        x <- forAll graph
+        y <- forAll graph
+        z <- forAll graph
+        assertEqual ((x + y) ~> z) ((x ~> z) + (y ~> z)))
+    , property "x ~> y ~> z = (x ~> y) + (x ~> z) + (y ~> z)" (do
+        x <- forAll graph
+        y <- forAll graph
+        z <- forAll graph
+        assertEqual (x ~> y ~> z) ((x ~> y) + (x ~> z) + (y ~> z)))
+    ]
+
+constructions : Test
+constructions =
+  group
+    "Constructions"
+    [ unit
+      "edge"
+      (assertEqual (edge 1 2 : Relation) (MkRelation [1, 2] [MkPair 1 2]))
+    , unit
+      "vertices"
+      (assertEqual (vertices [3, 1, 2, 1] : Relation) (MkRelation [1, 2, 3] []))
+    , unit
+      "clique"
+      (assertEqual
+         (clique [1, 2, 3] : Relation)
+         (MkRelation [1, 2, 3] [MkPair 1 2, MkPair 1 3, MkPair 2 3]))
+    ]

@@ -1,0 +1,27 @@
+module heff_graph.graph
+
+-- g refers to the graph type of vertex
+-- a is the type itself store
+theory Vertex g where
+  a : Type
+
+theory Graph g where
+  empty : g
+  vertex : Vertex g -> g
+  overlay : g -> g -> g
+  connect : g -> g -> g
+
+connect : {g : Type} -> {{m : Graph g}} -> g -> g -> g
+connect x y = m.connect x y
+
+vertex : {g : Type} -> {{m : Graph g}} -> Vertex g -> g
+vertex v = m.vertex v
+
+edge : {g : Type} -> {{_ : Graph g}} -> Vertex g -> Vertex g -> g
+edge x y = connect (vertex x) (vertex y)
+
+graphAdd : {g : Type} -> {{_ : Graph g}} -> g -> g -> g
+graphAdd x y = abandon
+
+instance instanceAdditionGraph : {g : Type} -> {{_ : Graph g}} -> Addition g
+instanceAdditionGraph = { add = graphAdd }

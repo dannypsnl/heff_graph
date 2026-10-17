@@ -3,7 +3,7 @@ module test.graph
 import check
 import co
 import generator as Generator
-import heff_graph.graph
+import heff_graph.algebra
 
 -- | A graph as its vertices and its edges, each sorted and without
 -- | duplicates, so that two equal graphs are written the same.

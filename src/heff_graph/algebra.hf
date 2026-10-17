@@ -1,4 +1,4 @@
-module heff_graph.graph
+module heff_graph.algebra
   ( Graph
   , instanceAdditionGraph
   , empty

@@ -2,32 +2,32 @@ module test.graph
 
 import check
 import co
-import generator as Generator
+import generator as Gen
 import heff_graph.algebra
 import heff_graph.graph.relation
 
 -- | A graph built by the theory's operations, of at most `n` of them,
 -- | on the vertices 0 to 5 (few, so that the operands share some).
-graphOf : Int -> Generator.Generator Relation
+graphOf : Int -> Gen.Generator Relation
 graphOf n =
   if n <= 1
-  then Generator.oneOf
+  then Gen.oneOf
       (MkNonEmptyList
-         (Generator.constant empty)
-         [ Generator.map
+         (Gen.constant empty)
+         [ Gen.map
            (\(i : Int) -> (vertex i : Relation))
-           (Generator.int 0 5)
+           (Gen.int 0 5)
          ])
-  else Generator.oneOf
+  else Gen.oneOf
       (MkNonEmptyList
          (graphOf 1)
-         [ Generator.map2 (\a b -> a + b) (graphOf (n / 2)) (graphOf (n / 2))
-         , Generator.map2 (\a b -> a ~> b) (graphOf (n / 2)) (graphOf (n / 2))
+         [ Gen.map2 (\a b -> a + b) (graphOf (n / 2)) (graphOf (n / 2))
+         , Gen.map2 (\a b -> a ~> b) (graphOf (n / 2)) (graphOf (n / 2))
          ])
 
 -- | A graph of a size that grows with the runs.
-graph : Generator.Generator Relation
-graph = Generator.sized (\n -> graphOf (n / 4))
+graph : Gen.Generator Relation
+graph = Gen.sized (\n -> graphOf (n / 4))
 
 laws : Test
 laws =

@@ -1,0 +1,10 @@
+-- A module of the package, as every file of src/ is: `heff build`
+-- checks them all, and `heff test` their doc tests.
+
+module heff_graph.greeting
+
+-- | a greeting, of `name`
+-- | >>> greeting "heff"
+-- | "Hello, heff!"
+greeting : String -> String
+greeting name = "Hello, " ^ name ^ "!"

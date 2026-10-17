@@ -1,0 +1,4 @@
+import manifest
+
+package : Package
+package = { module = "heff_graph", heff = "0.5.0" }

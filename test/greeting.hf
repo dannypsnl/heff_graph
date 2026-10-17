@@ -1,0 +1,11 @@
+-- `heff test` runs the tests of every file of test/ (and src/): the
+-- definitions of type `Test` (lib/check.hf), after the watches and doc
+-- tests.
+
+module test.greeting
+
+import check
+import heff_graph.greeting
+
+greets : Test
+greets = unit "greeting" (assertEqual (greeting "test") "Hello, test!")

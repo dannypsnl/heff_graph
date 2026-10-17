@@ -1,4 +1,14 @@
 module heff_graph.graph
+  ( Graph
+  , empty
+  , overlay
+  , connect
+  , (<=>)
+  , vertex
+  , edge
+  , vertices
+  , clique
+  )
 
 -- g refers to the graph type of vertex
 -- a is the type itself store
@@ -24,10 +34,9 @@ instanceAdditionGraph = { add = overlay }
 connect : {g : Type} -> {{m : Graph g}} -> g -> g -> g
 connect x y = m.connect x y
 
-instance instanceMultiplicationGraph : {g : Type}
-                                     -> {{_ : Graph g}}
-                                     -> Multiplication g
-instanceMultiplicationGraph = { mul = connect }
+infixl <=>
+(<=>) : {g : Type} -> {{m : Graph g}} -> g -> g -> g
+(<=>) = connect
 
 vertex : {g : Type} -> {{m : Graph g}} -> m.v -> g
 vertex x = m.vertex x
@@ -41,4 +50,4 @@ vertices (x :: xs) = (vertex x) + (vertices xs)
 
 clique : {g : Type} -> {{m : Graph g}} -> List m.v -> g
 clique [] = empty
-clique (x :: xs) = (vertex x) * (vertices xs)
+clique (x :: xs) = (vertex x) <=> (vertices xs)

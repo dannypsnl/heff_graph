@@ -18,8 +18,16 @@ empty = m.empty
 overlay : {g : Type} -> {{m : Graph g}} -> g -> g -> g
 overlay x y = m.overlay x y
 
+instance instanceAdditionGraph : {g : Type} -> {{_ : Graph g}} -> Addition g
+instanceAdditionGraph = { add = overlay }
+
 connect : {g : Type} -> {{m : Graph g}} -> g -> g -> g
 connect x y = m.connect x y
+
+instance instanceMultiplicationGraph : {g : Type}
+                                     -> {{_ : Graph g}}
+                                     -> Multiplication g
+instanceMultiplicationGraph = { mul = connect }
 
 vertex : {g : Type} -> {{m : Graph g}} -> m.v -> g
 vertex x = m.vertex x
@@ -29,20 +37,8 @@ edge x y = connect (vertex x) (vertex y)
 
 vertices : {g : Type} -> {{m : Graph g}} -> List m.v -> g
 vertices [] = empty
-vertices (x :: xs) =
-  overlay
-    (vertex x)
-    (vertices xs)
+vertices (x :: xs) = (vertex x) + (vertices xs)
 
 clique : {g : Type} -> {{m : Graph g}} -> List m.v -> g
 clique [] = empty
-clique (x :: xs) =
-  connect
-    (vertex x)
-    (vertices xs)
-
-graphAdd : {g : Type} -> {{_ : Graph g}} -> g -> g -> g
-graphAdd x y = abandon
-
-instance instanceAdditionGraph : {g : Type} -> {{_ : Graph g}} -> Addition g
-instanceAdditionGraph = { add = graphAdd }
+clique (x :: xs) = (vertex x) * (vertices xs)

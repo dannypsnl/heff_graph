@@ -1,0 +1,42 @@
+module heff_graph.graph.relation
+  ( Relation(..)
+  , instanceShowRelation
+  , instanceGraphRelation
+  )
+import heff_graph.algebra
+
+-- | A graph as its vertices and its edges, each sorted and without
+-- | duplicates, so that two equal graphs are written the same.
+data Relation = MkRelation (List Int) (List (Pair Int Int))
+
+instance instanceShowRelation : Show Relation
+instanceShowRelation = { show = written }
+  where
+  written : Relation -> String
+  written (MkRelation vs es) = "MkRelation (" ^ show vs ^ ") (" ^ show es ^ ")"
+
+-- | `xs` sorted, each element once.
+normalize : {a : Type} -> {{ord : Order a}} -> List a -> List a
+normalize xs = dedup (List.sort xs)
+  where
+  dedup : List a -> List a
+  dedup (x :: y :: rest) = case compare x y of
+    EQ -> dedup (y :: rest)
+    _ -> x :: dedup (y :: rest)
+  dedup ys = ys
+
+instance instanceGraphRelation : Graph Relation
+instanceGraphRelation =
+  { v = Int
+  , empty = MkRelation [] []
+  , vertex = \x -> MkRelation [x] []
+  , overlay = \(MkRelation xs es) (MkRelation ys fs) ->
+        MkRelation (normalize (xs ++ ys)) (normalize (es ++ fs))
+  , connect = \(MkRelation xs es) (MkRelation ys fs) ->
+        MkRelation
+          (normalize (xs ++ ys))
+          (normalize
+             (es
+              ++ fs
+              ++ List.concatMap (\x -> List.map (\y -> MkPair x y) ys) xs))
+  }

@@ -2,23 +2,44 @@ module heff_graph.graph
 
 -- g refers to the graph type of vertex
 -- a is the type itself store
-theory Vertex g where
-  a : Type
+-- theory Vertex g where
+--   a : Type
 
 theory Graph g where
+  v : Type
   empty : g
-  vertex : Vertex g -> g
+  vertex : v -> g
   overlay : g -> g -> g
   connect : g -> g -> g
+
+empty : {g : Type} -> {{m : Graph g}} -> g
+empty = m.empty
+
+overlay : {g : Type} -> {{m : Graph g}} -> g -> g -> g
+overlay x y = m.overlay x y
 
 connect : {g : Type} -> {{m : Graph g}} -> g -> g -> g
 connect x y = m.connect x y
 
-vertex : {g : Type} -> {{m : Graph g}} -> Vertex g -> g
-vertex v = m.vertex v
+vertex : {g : Type} -> {{m : Graph g}} -> m.v -> g
+vertex x = m.vertex x
 
-edge : {g : Type} -> {{_ : Graph g}} -> Vertex g -> Vertex g -> g
+edge : {g : Type} -> {{m : Graph g}} -> m.v -> m.v -> g
 edge x y = connect (vertex x) (vertex y)
+
+vertices : {g : Type} -> {{m : Graph g}} -> List m.v -> g
+vertices [] = empty
+vertices (x :: xs) =
+  overlay
+    (vertex x)
+    (vertices xs)
+
+clique : {g : Type} -> {{m : Graph g}} -> List m.v -> g
+clique [] = empty
+clique (x :: xs) =
+  connect
+    (vertex x)
+    (vertices xs)
 
 graphAdd : {g : Type} -> {{_ : Graph g}} -> g -> g -> g
 graphAdd x y = abandon

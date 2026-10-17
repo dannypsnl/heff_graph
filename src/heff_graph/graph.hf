@@ -1,19 +1,4 @@
-module heff_graph.graph
-  ( Graph
-  , empty
-  , overlay
-  , connect
-  , (<=>)
-  , vertex
-  , edge
-  , vertices
-  , clique
-  )
-
--- g refers to the graph type of vertex
--- a is the type itself store
--- theory Vertex g where
---   a : Type
+module heff_graph.graph (Graph, empty, (<=>), vertex, edge, vertices, clique)
 
 theory Graph g where
   v : Type
@@ -25,29 +10,28 @@ theory Graph g where
 empty : {g : Type} -> {{m : Graph g}} -> g
 empty = m.empty
 
-overlay : {g : Type} -> {{m : Graph g}} -> g -> g -> g
-overlay x y = m.overlay x y
-
-instance instanceAdditionGraph : {g : Type} -> {{_ : Graph g}} -> Addition g
-instanceAdditionGraph = { add = overlay }
-
-connect : {g : Type} -> {{m : Graph g}} -> g -> g -> g
-connect x y = m.connect x y
+instance instanceAdditionGraph : {g : Type}
+                               -> {{m : Graph g}}
+                               -> Addition g
+instanceAdditionGraph = { add = m.overlay }
 
 infixl <=>
 (<=>) : {g : Type} -> {{m : Graph g}} -> g -> g -> g
-(<=>) = connect
+(<=>) = m.connect
 
 vertex : {g : Type} -> {{m : Graph g}} -> m.v -> g
 vertex x = m.vertex x
 
 edge : {g : Type} -> {{m : Graph g}} -> m.v -> m.v -> g
-edge x y = connect (vertex x) (vertex y)
+edge x y = (vertex x) <=> (vertex y)
 
 vertices : {g : Type} -> {{m : Graph g}} -> List m.v -> g
 vertices [] = empty
 vertices (x :: xs) = (vertex x) + (vertices xs)
 
-clique : {g : Type} -> {{m : Graph g}} -> List m.v -> g
-clique [] = empty
+clique : {g : Type}
+       -> {{m : Graph g}}
+       -> List m.v
+       -> g
+clique [] = m.empty
 clique (x :: xs) = (vertex x) <=> (vertices xs)

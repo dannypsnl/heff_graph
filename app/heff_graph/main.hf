@@ -1,15 +1,8 @@
--- The program heff_graph: `heff build` builds it to .heff/bin/, as
--- build.hf says, and `heff install` into ~/.heff/bin/; run, without
--- a build, by `heff run app/heff_graph/main.hf`.
-
 module app.heff_graph.main
 
 import co
-import heff_graph.greeting
 import std.io
 
-program : {e : HFunctor} -> {{io : stdio <: e}} -> Co e Unit
-program = print (greeting "world")
-
-main : Co stdio Unit
-main = program (io := here stdio)
+main : {{io : stdio <: stdio}} -> Co stdio Unit
+main = do
+  print "Nothing"

@@ -3,6 +3,6 @@ module app.heff_graph.main
 import co
 import std.io
 
-main : {{io : stdio <: stdio}} -> Co stdio Unit
+main : Co stdio Unit
 main = do
-  print "Nothing"
+  print (ev := here stdio) "Nothing"

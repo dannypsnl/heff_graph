@@ -1,4 +1,13 @@
-module heff_graph.graph (Graph, empty, (<=>), vertex, edge, vertices, clique)
+module heff_graph.graph
+  ( Graph
+  , instanceAdditionGraph
+  , empty
+  , (~>)
+  , vertex
+  , edge
+  , vertices
+  , clique
+  )
 
 theory Graph g where
   v : Type
@@ -15,15 +24,15 @@ instance instanceAdditionGraph : {g : Type}
                                -> Addition g
 instanceAdditionGraph = { add = m.overlay }
 
-infixl <=>
-(<=>) : {g : Type} -> {{m : Graph g}} -> g -> g -> g
-(<=>) = m.connect
+infixl ~>
+(~>) : {g : Type} -> {{m : Graph g}} -> g -> g -> g
+(~>) = m.connect
 
 vertex : {g : Type} -> {{m : Graph g}} -> m.v -> g
 vertex x = m.vertex x
 
 edge : {g : Type} -> {{m : Graph g}} -> m.v -> m.v -> g
-edge x y = (vertex x) <=> (vertex y)
+edge x y = (vertex x) ~> (vertex y)
 
 vertices : {g : Type} -> {{m : Graph g}} -> List m.v -> g
 vertices [] = empty
@@ -34,4 +43,4 @@ clique : {g : Type}
        -> List m.v
        -> g
 clique [] = m.empty
-clique (x :: xs) = (vertex x) <=> (vertices xs)
+clique (x :: xs) = (vertex x) ~> (clique xs)

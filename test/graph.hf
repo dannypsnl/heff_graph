@@ -16,8 +16,8 @@ instanceShowRelation = { show = written }
   written (MkRelation vs es) = "MkRelation (" ^ show vs ^ ") (" ^ show es ^ ")"
 
 -- | `xs` sorted, each element once.
-normal : {a : Type} -> {{ord : Order a}} -> List a -> List a
-normal xs = dedup (List.sort xs)
+normalize : {a : Type} -> {{ord : Order a}} -> List a -> List a
+normalize xs = dedup (List.sort xs)
   where
   dedup : List a -> List a
   dedup (x :: y :: rest) =
@@ -30,11 +30,11 @@ instanceGraphRelation =
   , empty = MkRelation [] []
   , vertex = \x -> MkRelation [x] []
   , overlay = \(MkRelation xs es) (MkRelation ys fs) ->
-        MkRelation (normal (xs ++ ys)) (normal (es ++ fs))
+        MkRelation (normalize (xs ++ ys)) (normalize (es ++ fs))
   , connect = \(MkRelation xs es) (MkRelation ys fs) ->
         MkRelation
-          (normal (xs ++ ys))
-          (normal
+          (normalize (xs ++ ys))
+          (normalize
              (es
               ++ fs
               ++ List.concatMap (\x -> List.map (\y -> MkPair x y) ys) xs))

@@ -1,6 +1,6 @@
 module heff_graph.algebra
   ( Graph
-  , instanceAdditionGraph
+  , additionOfGraph
   , empty
   , (~>)
   , vertex
@@ -19,10 +19,10 @@ theory Graph g where
 empty : {g : Type} -> {{m : Graph g}} -> g
 empty = m.empty
 
-instance instanceAdditionGraph : {g : Type}
-                               -> {{m : Graph g}}
-                               -> Addition g
-instanceAdditionGraph = { add = m.overlay }
+additionOfGraph : {g : Type}
+                -> {{m : Graph g}}
+                -> Addition g
+additionOfGraph = { add = m.overlay }
 
 infixl ~>
 (~>) : {g : Type} -> {{m : Graph g}} -> g -> g -> g
@@ -36,7 +36,7 @@ edge x y = (vertex x) ~> (vertex y)
 
 vertices : {g : Type} -> {{m : Graph g}} -> List m.v -> g
 vertices [] = empty
-vertices (x :: xs) = (vertex x) + (vertices xs)
+vertices (x :: xs) = m.overlay (vertex x) (vertices xs)
 
 clique : {g : Type}
        -> {{m : Graph g}}

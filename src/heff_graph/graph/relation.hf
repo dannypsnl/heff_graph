@@ -2,6 +2,7 @@ module heff_graph.graph.relation
   ( Relation(..)
   , instanceShowRelation
   , instanceGraphRelation
+  , instanceAdditionRelation
   )
 import heff_graph.algebra
 
@@ -40,3 +41,6 @@ instanceGraphRelation =
               ++ fs
               ++ List.concatMap (\x -> List.map (\y -> MkPair x y) ys) xs))
   }
+
+instance instanceAdditionRelation : Addition Relation
+instanceAdditionRelation = additionOfGraph

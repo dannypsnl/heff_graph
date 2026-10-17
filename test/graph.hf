@@ -20,8 +20,9 @@ normalize : {a : Type} -> {{ord : Order a}} -> List a -> List a
 normalize xs = dedup (List.sort xs)
   where
   dedup : List a -> List a
-  dedup (x :: y :: rest) =
-    if compare x y == EQ then dedup (y :: rest) else x :: dedup (y :: rest)
+  dedup (x :: y :: rest) = case compare x y of
+    EQ -> dedup (y :: rest)
+    _ -> x :: dedup (y :: rest)
   dedup ys = ys
 
 instance instanceGraphRelation : Graph Relation
